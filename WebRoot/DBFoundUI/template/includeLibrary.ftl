@@ -13,7 +13,7 @@
 <script type="text/javascript">
 	Ext.Ajax.on("requestcomplete",function(conn,response,option){
 		var obj = Ext.util.JSON.decode(response.responseText);
-		if(obj.timeout){DBFound.open("login_window","登录超时，请重新登录",350,210,"${basePath}relogin.jsp");}
+		if(obj.timeout){DBFound.open("login_window","登录超时，请重新登录",400,250,"${basePath}relogin.jsp?ajax=1");}
 	});
 </script>
 <style>

@@ -13,16 +13,33 @@
 					param : loginForm.getData(),
 					callback : function(obj) {
 						if (obj.success == true) {
-							var url=parent.location.href;
-							parent.location.href=url;
+							var ajax = "${param.ajax}";
+							if(ajax == "1"){
+								close();
+							}else{
+								var url=parent.location.href;
+								parent.location.href=url;
+							}
+							
 						} else{
 							parent.$D.showMessage(obj.message)
 						}
 					}
 				});
+			}else{
+				parent.$D.showMessage("验证通不过！")
 			}
+				
 		}
 
+		function close() {
+			if (parent) {
+				var window = parent.Ext.getCmp("login_window");
+				window.close();
+				parent.location.reload(true);
+			}
+		}
+		
 		function reset() {
 			loginForm.form.reset();
 		}
@@ -40,7 +57,6 @@
 			</d:line>
 			<d:line columnWidth="1">
 				<d:field name="password" required="true" editor="password" prompt="密码">
-				  <d:event name="enter" handle="login"/>
 				</d:field>
 			</d:line>
 			<d:line columnWidth="1">
@@ -53,7 +69,11 @@
 			</d:toolBar>
 		</d:form>
 		<script>
-			loginForm.reset();
+			Ext.onReady(function(){
+				loginForm.getForm().reset();
+				loginForm.reset();
+			})
+			
 		</script>
 	</body>
 </html>
