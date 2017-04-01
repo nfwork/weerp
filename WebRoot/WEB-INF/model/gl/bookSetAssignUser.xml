@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://dbfound.googlecode.com/model http://dbfound.googlecode.com/svn/tags/v2/model.xsd">
+    
+    <!-- 公共变量 -->
+    <param name="user_code" dataType="number" scope="session" />
+    <!-- 公共变量end -->
+    
+	<query name="disabled">
+		<param name="book_set_id" dataType="number" />
+		<sql>
+		 <![CDATA[
+			 select 
+				 user_id,
+				 user_code 
+			 from sys_user 
+			 where user_id not in (select user_id from gl_book_set_assign where book_set_id=${@book_set_id})
+             and `status` = 'Y'
+		  ]]>
+		</sql>
+	</query>
+
+
+	<query name="enabled">
+		<param name="book_set_id" dataType="number" />
+		<sql>
+		 <![CDATA[
+		 	SELECT u.user_id,user_code
+		 	FROM gl_book_set_assign p ,sys_user  u
+			WHERE u.user_id = p.user_id
+	         	AND u.`status` = 'Y' 
+                AND book_set_id =${@book_set_id}
+		  ]]>
+		</sql>
+	</query>
+
+
+	<query name="combo">
+		<sql>
+		 <![CDATA[
+			SELECT f.function_id,
+			       concat(concat(f.function_code,'-'),f.function_des)  function_des
+				 FROM SYS_FUNCTION f
+			ORDER BY f.function_code
+		  ]]>
+		</sql>
+	</query>
+
+	<execute name="enabled">
+		<param name="user_id" dataType="number" />
+		<param name="book_set_id" dataType="number" scope="param" />
+		<param name="create_by" dataType="number" sourcePath="session.user_id" />
+		<sqls>
+			<executeSql>
+			 <![CDATA[
+				INSERT INTO gl_book_set_assign
+					(book_set_id,
+					user_id,
+					create_by,
+					create_date
+					)
+				VALUES
+					(${@book_set_id},
+					${@user_id},
+					${@create_by},
+					now()
+					)
+			 ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+
+	<execute name="disabled">
+		<param name="book_set_id" dataType="number" scope="param" />
+		<param name="user_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			 <![CDATA[
+			delete from gl_book_set_assign where book_set_id=${@book_set_id} and user_id=${@user_id}
+			 ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+	
+</model>

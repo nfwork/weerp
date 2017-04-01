@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://dbfound.googlecode.com/model https://raw.githubusercontent.com/nfwork/dbfound/master/tags/model.xsd">
+	
+	<param name="book_set_id" dataType="number" sourcePath="session.book_set_id"  />
+	
+	<query>
+		<sql>
+		 <![CDATA[
+			 select t.item_id,
+			 		t.item_num,
+					t.period_id,
+					t.regist_user_id,
+					(select user_name from sys_user u where u.user_id = t.regist_user_id) regiest_user,
+					t.regist_time,
+					t.exp_time,
+					t.description,
+					p.period_name,
+					(select user_name from sys_user u where u.user_id = t.approve_user_id) approve_user,
+					t.approve_time,
+					t.status,
+					l.dr_amount,
+					l.cr_amount,
+					l.description line_description,
+					concat(a.account_code,'-',a.account_name) account_desc
+			   from gl_account_item t,gl_period p,gl_account_item_line l,gl_account a
+			  where t.period_id = p.period_id
+			   and t.item_id = l.item_id
+			   and l.account_id = a.account_id
+			   and t.book_set_id = ${@book_set_id}
+			  #AND_CLAUSE#
+		 ]]>
+		</sql>
+		<filter name="item_num" express="t.item_num = ${@item_num}" />
+		<filter name="period_id" express="t.period_id = ${@period_id}" />
+		<filter name="description" express="t.description like concat('%',${@description},'%')" />
+		<filter name="timefrom" express="t.exp_time &gt;= ${@timefrom}" />
+		<filter name="timeto" express="t.exp_time &lt;= ${@timeto}" />
+		<filter name="status" express="t.status= ${@status}" />
+		<filter name="account_id" express="a.account_id= ${@account_id}" />
+	</query>
+	
+</model>

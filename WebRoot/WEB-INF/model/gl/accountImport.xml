@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://dbfound.googlecode.com/model https://raw.githubusercontent.com/nfwork/dbfound/master/tags/model.xsd">
+
+	<param name="book_set_id" dataType="number" sourcePath="session.book_set_id" />
+
+	<execute>
+		<param name="科目代码" dataType="varchar" />
+		<param name="科目名称" dataType="varchar" />
+		<param name="科目类别" dataType="varchar" />
+		<param name="余额方向" dataType="varchar" />
+		<param name="期末调汇" dataType="varchar" />
+		<param name="科目描述" dataType="varchar" />
+		<param name="file_name" dataType="varchar" />
+		<param name="file" dataType="file" />
+		<param name="code" value="ACCOUNTTYPE" />
+		<param name="account_type" value="ACCOUNTTYPE" />
+		<param name="user_id" dataType="number" sourcePath="session.user_id" />
+		<sqls>
+			<excelReader sourceParam="file" rootPath="exceldatas" />
+			<batchSql sourcePath="exceldatas[0]">
+				<executeSql>
+					<![CDATA[
+					insert into gl_account(
+				    		account_code,
+				    		account_name,
+				    		account_type,
+				    		book_set_id,
+				    		balance_direction, 
+							end_adjust, 
+							account_description, 
+							create_by, 
+							create_date, 
+							last_update_by, 
+							last_update_date)
+					values(
+				    		${@科目编码},
+				    		${@科目名称},
+				    		${@科目类别},
+				    		 ${@book_set_id},
+				    		${@余额方向},
+				    		${@期末调汇},
+				    		${@科目描述},
+				    		${@user_id},
+				    		now(),
+				    		${@user_id},
+				    		now()
+				    		)
+				    ON DUPLICATE KEY UPDATE 
+	                    account_name = values(account_name),
+	                    account_type = values(account_type),
+	                    balance_direction = values(balance_direction),
+	                    end_adjust = values(end_adjust),
+	                    balance_direction = values(balance_direction),
+	                    last_update_by = values(last_update_by),
+	                    last_update_date = values(last_update_date)
+					]]>
+				</executeSql>
+			</batchSql>
+			<query modelName="gl/accountImport" name="queryAccountType" rootPath="accountTypes"/>
+			<batchSql sourcePath="accountTypes">
+				<executeSql>
+					<![CDATA[
+					 insert into fnd_source_code(
+				    		code,
+				    		code_value,
+				    		code_name,
+				    		priority,
+				    		book_set_id,
+				    		last_update_by,
+				    		last_update_date)
+					values(
+				    		${@code},
+				    		${@account_type},
+				    		${@account_type},
+				    		null,
+				    		${@book_set_id},
+				    		${@user_id},
+				    		now())
+				     ON DUPLICATE KEY UPDATE 
+	                    code_name = values(code_name),
+	                    last_update_by = values(last_update_by),
+	                    last_update_date = values(last_update_date)
+					]]>
+				</executeSql>
+			</batchSql>
+		</sqls>
+	</execute>
+	
+	<query name="queryAccountType">
+		<sql>
+		 <![CDATA[
+			 select distinct account_type
+			   from gl_account t
+			  where t.book_set_id = ${@book_set_id}
+		 ]]>
+		</sql>
+	</query>
+</model>

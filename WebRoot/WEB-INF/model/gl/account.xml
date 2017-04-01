@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://dbfound.googlecode.com/model https://raw.githubusercontent.com/nfwork/dbfound/master/tags/model.xsd">
+	
+	<param name="book_set_id" dataType="number" sourcePath="session.book_set_id"  />
+	
+	<query>
+		<sql>
+		 <![CDATA[
+			 select account_id,
+				account_code,
+				account_name,
+				account_type,
+				balance_direction, 
+				end_adjust, 
+				account_description,
+				(select CONCAT(user_code,'-',user_name) from sys_user where user_id =t.last_update_by) last_update_user,
+				last_update_date
+			from gl_account t
+			where t.book_set_id = ${@book_set_id}
+			#AND_CLAUSE#
+			order by account_code 
+		 ]]>
+		</sql>
+		<filter name="account_name" express="account_name like ${@account_name}"/>
+		<filter name="account_code" express="account_code like ${@account_code}"/>
+		<filter name="account_type" express="account_type like ${@account_type}"/>
+	</query>
+	
+	<query name="combo">
+		<sql>
+		 <![CDATA[
+			 select account_id,
+			 	concat(account_code,'-',account_name) account_desc
+			from gl_account t
+			where t.book_set_id = ${@book_set_id}
+			order by account_code 
+		 ]]>
+		</sql>
+	</query>
+	
+	
+	<execute name="add">
+		<param name="account_code" dataType="varchar" />
+		<param name="account_name" dataType="varchar" />
+		<param name="account_type" dataType="varchar" />
+		<param name="balance_direction" dataType="varchar" />
+		<param name="end_adjust" dataType="varchar" />
+		<param name="account_description" dataType="varchar" />
+		<param name="create_by" dataType="number" scope="session" sourcePath="session.user_id" />
+		<param name="last_update_by" dataType="number" scope="session" sourcePath="session.user_id" />
+		<sqls>
+			<executeSql>
+			 <![CDATA[
+			    insert into gl_account(
+			    		account_code,
+			    		account_name,
+			    		account_type,
+			    		book_set_id,
+			    		balance_direction, 
+						end_adjust, 
+						account_description,
+						create_by,
+			    		create_date,
+			    		last_update_by,
+			    		last_update_date)
+				values(
+			    		${@account_code},
+			    		${@account_name},
+			    		${@account_type},
+			    		 ${@book_set_id},
+			    		${@balance_direction},
+			    		${@end_adjust},
+			    		${@account_description},
+			    		${@create_by},
+			    		now(),
+			    		${@last_update_by},
+			    		now())
+			 ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+
+	<execute name="update">
+		<param name="account_code" dataType="varchar" />
+		<param name="account_name" dataType="varchar" />
+		<param name="priority" dataType="number" />
+		<param name="account_type" dataType="varchar" />
+		<param name="account_id" dataType="number" />
+		<param name="balance_direction" dataType="varchar" />
+		<param name="end_adjust" dataType="varchar" />
+		<param name="account_description" dataType="varchar" />
+		<param name="last_update_by" dataType="number" scope="session" sourcePath="session.user_id" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_account
+				   set 
+					account_code = ${@account_code},
+					account_name = ${@account_name},
+					account_type = ${@account_type},
+					end_adjust = ${@end_adjust},
+					account_description = ${@account_description},
+					balance_direction = ${@balance_direction},
+					last_update_by = ${@last_update_by},
+					last_update_date = now()			
+				 where account_id = ${@account_id} 
+				   and book_set_id = ${@book_set_id}
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+
+	<execute name="delete">
+		<param name="account_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				delete from gl_account where account_id = ${@account_id} 
+				 and book_set_id = ${@book_set_id}
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+</model>

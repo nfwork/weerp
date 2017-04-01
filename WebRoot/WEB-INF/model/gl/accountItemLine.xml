@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://dbfound.googlecode.com/model https://raw.githubusercontent.com/nfwork/dbfound/master/tags/model.xsd">
+	
+	<param name="book_set_id" dataType="number" sourcePath="session.book_set_id"  />
+	
+	<query>
+		<param name="item_id" dataType="number" />
+		<sql>
+		 <![CDATA[
+			 select t.item_line_id,
+					t.account_id,
+					t.dr_amount,
+					t.cr_amount,
+					t.regist_user_id,
+					t.description,
+					(select user_name from sys_user u where u.user_id = t.regist_user_id) regiest_user,
+					t.regist_time,
+					concat(a.account_code,'-',a.account_name) account_desc
+			   from gl_account_item_line t,gl_account a
+			  where t.account_id = a.account_id
+			    and t.book_set_id = ${@book_set_id}
+			    and t.item_id = ${@item_id}
+			    #AND_CLAUSE#
+		 ]]>
+		</sql>
+	</query>
+
+	<execute name="save">
+		<param name="item_id" dataType="number" scope="outParam" />
+		<param name="dr_amount" dataType="number" />
+		<param name="cr_amount" dataType="number" />
+		<param name="account_id" dataType="number" />
+		<param name="description" dataType="varchar" />
+		<param name="regist_user_id" dataType="number" sourcePath="session.user_id" />
+		<param name="item_line_id" dataType="number" />
+		<sqls>
+			<whenSql when="${@item_line_id} is not null">
+				<execute name="update"/>
+			</whenSql>
+			<whenSql when="${@item_line_id} is null">
+				<execute name="add"/>
+			</whenSql>
+		</sqls>
+
+	</execute>
+
+	<execute name="add">
+		<param name="item_id" dataType="number" scope="outParam" />
+		<param name="dr_amount" dataType="number" />
+		<param name="cr_amount" dataType="number" />
+		<param name="account_id" dataType="number" />
+		<param name="description" dataType="varchar" />
+		<param name="regist_user_id" dataType="number" sourcePath="session.user_id" />
+		<sqls>
+			<executeSql>
+			 <![CDATA[
+			    insert into gl_account_item_line(
+			    		item_id,
+			    		dr_amount,
+			    		cr_amount,
+			    		account_id,
+			    		description,
+			    		regist_time,
+			    		book_set_id,
+			    		status,
+			    		regist_user_id)
+				values(
+			    		${@item_id},
+			    		${@dr_amount},
+			    		${@cr_amount},
+			    		${@account_id},
+			    		${@description},
+			    		now(),
+			    		${@book_set_id},
+			    		'N',
+			    		${@regist_user_id})
+			 ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+
+	<execute name="update">
+		<param name="item_id" dataType="number" scope="outParam" />
+		<param name="dr_amount" dataType="number" />
+		<param name="cr_amount" dataType="number" />
+		<param name="account_id" dataType="number" />
+		<param name="description" dataType="varchar" />
+		<param name="regist_user_id" dataType="number" sourcePath="session.user_id" />
+		<param name="item_line_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item_line
+				   set 
+					item_id = ${@item_id},
+					dr_amount = ${@dr_amount},
+					cr_amount = ${@cr_amount},
+					account_id = ${@account_id},
+					description = ${@description},
+					regist_time = now(),
+					regist_user_id = ${@regist_user_id}		
+				 where item_line_id = ${@item_line_id} 
+				 and book_set_id = ${@book_set_id}
+				 and status = 'N'
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+</model>

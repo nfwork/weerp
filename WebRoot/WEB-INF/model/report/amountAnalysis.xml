@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://dbfound.googlecode.com/model https://raw.githubusercontent.com/nfwork/dbfound/master/tags/model.xsd">
+	
+	<param name="book_set_id" dataType="number" sourcePath="session.book_set_id"  />
+	
+	<query>
+		<param name="period_id" dataType="number" />
+		<sql>
+		 <![CDATA[
+			 select account_id,
+					account_code,
+					account_name,
+					(select ifnull(sum(ifnull(dr_amount,0)-ifnull(cr_amount,0)),0) from gl_account_item i,gl_account_item_line l 
+					  where l.account_id = t.account_id 
+					    and i.item_id = l.item_id
+					    and i.status = 'P'
+					    and i.period_id = ${@period_id}) emerge_amount
+				from gl_account t
+				where t.account_type = 'A002'
+				  and t.book_set_id = ${@book_set_id}
+		 ]]>
+		</sql>
+	</query>
+
+</model>

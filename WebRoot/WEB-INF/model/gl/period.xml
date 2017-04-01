@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://dbfound.googlecode.com/model https://raw.githubusercontent.com/nfwork/dbfound/master/tags/model.xsd">
+	
+	<param name="book_set_id" dataType="number" sourcePath="session.book_set_id"  />
+	
+	<query>
+		<sql>
+		 <![CDATA[
+			 select period_id,
+				period_code,
+				period_name,
+				status,
+				priority
+			from gl_period t
+			where t.book_set_id = ${@book_set_id}
+			#AND_CLAUSE#
+		 	order by t.priority
+		 ]]>
+		</sql>
+		<filter name="period_name" express="period_name like ${@period_name}"/>
+		<filter name="period_code" express="period_code like ${@period_code}"/>
+		<filter name="status" express="status = ${@status}"/>
+	</query>
+	
+	<query name="combo">
+		<sql>
+		 <![CDATA[
+			 select period_id,
+				period_code,
+				period_name,
+				status,
+				priority
+			from gl_period t
+			where status='Y'
+			  and t.book_set_id = ${@book_set_id}
+		 	order by t.priority
+		 ]]>
+		</sql>
+	</query>
+	
+	<query name="comboAll">
+		<sql>
+		 <![CDATA[
+			 select period_id,
+				period_code,
+				period_name,
+				status,
+				priority
+			from gl_period t
+			where status != 'A'
+			  and t.book_set_id = ${@book_set_id}
+		 	order by t.priority
+		 ]]>
+		</sql>
+	</query>
+	
+	<execute name="add">
+		<param name="period_code" dataType="varchar" />
+		<param name="period_name" dataType="varchar" />
+		<param name="status" dataType="varchar" />
+		<param name="priority" dataType="number" />
+		<sqls>
+			<executeSql>
+			 <![CDATA[
+			    insert into gl_period(
+			    		period_id,
+			    		period_code,
+			    		period_name,
+			    		status,
+			    		book_set_id,
+			    		priority)
+				values( ${@period_code},
+			    		${@period_code},
+			    		${@period_name},
+			    		${@status},
+			    		${@book_set_id},
+			    		${@priority})
+			 ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+
+	<execute name="update">
+		<param name="period_name" dataType="varchar" />
+		<param name="priority" dataType="number" />
+		<param name="period_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_period
+				   set 
+					period_name = ${@period_name},
+					priority = ${@priority}		
+				 where period_id = ${@period_id} 
+				   and book_set_id = ${@book_set_id}
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+	
+	<execute name="open">
+		<param name="status" dataType="varchar" />
+		<param name="period_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_period
+				   set 
+					status = 'Y'
+				 where period_id = ${@period_id} 
+				  and book_set_id = ${@book_set_id}
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+	
+	<execute name="close">
+		<param name="status" dataType="varchar" />
+		<param name="period_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_period
+				   set 
+					status = 'N'
+				 where period_id = ${@period_id} 
+				  and book_set_id = ${@book_set_id}
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+
+	<execute name="delete">
+		<param name="period_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				delete from gl_period where period_id = ${@period_id} 
+				 and book_set_id = ${@book_set_id}
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+</model>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://dbfound.googlecode.com/model https://raw.githubusercontent.com/nfwork/dbfound/master/tags/model.xsd">
+	
+	<param name="book_set_id" dataType="number" sourcePath="session.book_set_id"  />
+	<param name="user_id" dataType="number" sourcePath="session.user_id"  />
+	
+	<execute name="submit">
+		<param name="item_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item set status= 'S' where item_id = ${@item_id} 
+				and book_set_id = ${@book_set_id}
+				and status in ( 'N','B')
+			  ]]>
+			</executeSql>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item_line set status= 'S' where item_id = ${@item_id} 
+				and book_set_id = ${@book_set_id}
+				and status in ( 'N','B')
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+	
+	<execute name="return">
+		<param name="item_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item 
+				 set status= 'B',
+				     approve_user_id = ${@user_id},
+				     approve_time = now()
+				where item_id = ${@item_id} 
+				and book_set_id = ${@book_set_id}
+				and status = 'S'
+			  ]]>
+			</executeSql>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item_line 
+				   set status= 'B',
+				     approve_user_id = ${@user_id},
+				     approve_time = now()
+			    where item_id = ${@item_id} 
+				and book_set_id = ${@book_set_id}
+				and status = 'S'
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+	
+	<execute name="approve">
+		<param name="item_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item 
+				 set status= 'P',
+				     approve_user_id = ${@user_id},
+				     approve_time = now()
+				where item_id = ${@item_id} 
+				and book_set_id = ${@book_set_id}
+				and status = 'S'
+			  ]]>
+			</executeSql>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item_line 
+				   set status= 'P',
+				     approve_user_id = ${@user_id},
+				     approve_time = now()
+			    where item_id = ${@item_id} 
+				and book_set_id = ${@book_set_id}
+				and status = 'S'
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+	
+	<execute name="cancel">
+		<param name="item_id" dataType="number" />
+		<sqls>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item set status= 'C' where item_id = ${@item_id} 
+				and book_set_id = ${@book_set_id}
+				and status in ( 'N','B')
+			  ]]>
+			</executeSql>
+			<executeSql>
+			  <![CDATA[
+				update gl_account_item_line set status= 'C' where item_id = ${@item_id} 
+				and book_set_id = ${@book_set_id}
+				and status in ( 'N','B')
+			  ]]>
+			</executeSql>
+		</sqls>
+	</execute>
+</model>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://dbfound.googlecode.com/model" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://dbfound.googlecode.com/model https://raw.githubusercontent.com/nfwork/dbfound/master/tags/model.xsd">
+
+	<param name="rowColumnName" dataType="varchar" value="period_name" />
+	<param name="columnColumnName" dataType="varchar" value="account_name" />
+	<param name="keyColumnName" dataType="varchar" value="amount" />
+	
+	<param name="book_set_id" dataType="number" sourcePath="session.book_set_id"  />
+
+	<query>
+		<sql>
+		 <![CDATA[
+			SELECT
+			  	p.period_name,
+			  	a.account_name,
+			  	SUM(IFNULL(l.dr_amount,0)-IFNULL(l.cr_amount,0)) amount
+			FROM gl_account_item i,
+			 	gl_account_item_line l,
+			 gl_account a,
+			 gl_period p
+			WHERE i.item_id = l.item_id
+			AND a.account_id = l.account_id
+			AND a.account_type = 'A002'
+			AND i.period_id = p.period_id
+			 and i.status = 'P'
+			 and i.book_set_id = ${@book_set_id}
+			GROUP BY i.period_id,l.account_id
+			
+			union all
+			
+			SELECT
+		        p.period_name,
+		        '合计'         account_name,
+		        (SELECT
+		           SUM(IFNULL(l.dr_amount,0)-IFNULL(l.cr_amount,0))
+		         FROM gl_account_item i,
+		           gl_account_item_line l,
+		           gl_account a
+		         WHERE i.item_id = l.item_id
+		             AND a.account_id = l.account_id
+		             AND a.account_type = 'A002'
+		              and i.status = 'P'
+		               and i.book_set_id = ${@book_set_id}
+		             AND i.period_id = p.period_id)    amount
+		      FROM gl_period p
+		      where p.book_set_id = ${@book_set_id}
+		 ]]>
+		</sql>
+		<filter name="timefrom" express="i.exp_time &gt;= ${@timefrom}" />
+		<filter name="timeto" express="i.exp_time &lt;= ${@timeto}" />
+	</query>
+
+	<execute>
+		<sqls>
+			<java className="dbfound.plugin.report.RankTransform" />
+		</sqls>
+	</execute>
+
+</model>
