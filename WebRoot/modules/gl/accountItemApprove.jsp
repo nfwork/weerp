@@ -73,8 +73,8 @@
 		
 	    <d:grid id="itemGrid" title="凭证登记" selectFirstRow="false" pagerSize="10" queryForm="queryForm" model="gl/accountItemApprove" autoQuery="true" height="310">
 			<d:toolBar>
-			   <d:gridButton icon="DBFoundUI/images/check.png" title="审核" action="gl/accountItemOpear.execute!approve" afterAction="query" />
-			   <d:gridButton icon="DBFoundUI/images/remove.gif" title="打回" action="gl/accountItemOpear.execute!return" afterAction="query" />
+			   <d:gridButton icon="DBFoundUI/images/check.png" showConfirm="true" comfirmMessage="确认审批吗？" title="审核" action="gl/accountItemOpear.execute!approve" afterAction="query" />
+			   <d:gridButton icon="DBFoundUI/images/remove.gif" showConfirm="true" comfirmMessage="确认打回吗？" title="打回" action="gl/accountItemOpear.execute!return" afterAction="query" />
 			</d:toolBar>
 			<d:columns>
 				<d:column name="item_num" sortable="true" prompt="凭证号" width="80" />

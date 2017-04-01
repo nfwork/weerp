@@ -75,8 +75,8 @@
 			<d:toolBar>
 			   <d:gridButton icon="DBFoundUI/images/add.gif" title="新增" beforeAction="openAddWindow"/>
 			   <d:gridButton icon="DBFoundUI/images/page_attach.png" title="修改" beforeAction="openUpdateWindow" />
-			   <d:gridButton icon="DBFoundUI/images/submit.gif" title="提交" action="gl/accountItemOpear.execute!submit" afterAction="query" />
-			   <d:gridButton icon="DBFoundUI/images/delete.png" title="取消" action="gl/accountItemOpear.execute!cancel" afterAction="query" />
+			   <d:gridButton icon="DBFoundUI/images/submit.gif" showConfirm="true" comfirmMessage="确认提交吗？" title="提交" action="gl/accountItemOpear.execute!submit" afterAction="query" />
+			   <d:gridButton icon="DBFoundUI/images/delete.png" showConfirm="true" comfirmMessage="确认取消吗？" title="取消" action="gl/accountItemOpear.execute!cancel" afterAction="query" />
 			</d:toolBar>
 			<d:columns>
 				<d:column name="item_num" sortable="true" prompt="凭证号" width="80" />
