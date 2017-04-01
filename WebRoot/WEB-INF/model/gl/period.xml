@@ -63,13 +63,12 @@
 			<executeSql>
 			 <![CDATA[
 			    insert into gl_period(
-			    		period_id,
 			    		period_code,
 			    		period_name,
 			    		status,
 			    		book_set_id,
 			    		priority)
-				values( ${@period_code},
+				values( 
 			    		${@period_code},
 			    		${@period_name},
 			    		${@status},

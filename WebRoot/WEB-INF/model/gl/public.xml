@@ -6,7 +6,7 @@
 		<sql>
 		 <![CDATA[
 			SELECT (select p.period_id from gl_period p
-			          where p.period_id = DATE_FORMAT(NOW(),'%Y%m') 
+			          where p.period_code = DATE_FORMAT(NOW(),'%Y%m') 
 			          and p.status='Y'
 			          and p.book_set_id = ${@book_set_id}
 			          ) period,
